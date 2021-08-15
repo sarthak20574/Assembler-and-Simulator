@@ -3,6 +3,7 @@ string_list = []
 var_dict = {}
 label_dict = {}
 line_number=1
+halt_occured=False
 
 def process():
     for i in string_list:
@@ -41,7 +42,13 @@ inst_dict = {"add": "00000",
 
 
 def checking(arr):
+    global halt_occured
+    if halt_occured:
+        print("Halt has occured can't take anymore statements")
+        exit()
+
     result = ""
+   
     global line_number
 
 
@@ -54,7 +61,9 @@ def checking(arr):
     if length == 2:
         if arr[0] in inst_dict:  # Type E
             result += inst_dict[arr[0]] + "0"*3 + f'{label_dict[arr[1]]:08b}'
-
+        else:
+            print("This is not a type E statement but is 2 letters long, error at line number: "+str(line_number+len(var_dict)))
+            exit()
     elif length == 3:
         if arr[0] == "mov" and arr[2][0] == "$" and arr[1] in reg_dict:  # Type B
             result += "00010" + reg_dict[arr[1]] + f'{int(arr[2][1:]):08b}'
@@ -70,18 +79,24 @@ def checking(arr):
 
         elif arr[0] in inst_dict and arr[1] in reg_dict and arr[2] in var_dict:
             result += inst_dict[arr[0]] + reg_dict[arr[1]] + f'{var_dict[arr[2]]:08b}'
+        else:
+            print("This is not a type B or C statement but is 3 letters long, error at line number: "+str(line_number+len(var_dict)))
+            exit()
 
     elif length == 4:
         if arr[0] in inst_dict and arr[1] in reg_dict and arr[2] in reg_dict:  # Type A
             result += inst_dict[arr[0]] + "00" + reg_dict[arr[1]] + reg_dict[arr[2]] + reg_dict[arr[3]]
+        else:
+            print("This is not a type A statement but is 3 letters long, error at line number: "+str(line_number+len(var_dict)))
+            exit()
 
     elif length == 1:
         if arr[0] in inst_dict:
             result += inst_dict[arr[0]] + "0" * 11
+            halt_occured=True
     else:
-        print("error at line number: "+ line_number+len(var_dict))
+        print("syntax error at line number: "+str(line_number+len(var_dict)))
         exit()
-    
     line_number+=1
     print(result)
 
@@ -95,6 +110,7 @@ def main():
                 if not ln[0:3] == "var":
                     string_list.append(ln)
                 global line_number
+
 
                 Ln = ln.split()
                 if Ln[0] == "var":
@@ -124,6 +140,7 @@ def substituting_var_address():
 
 
 if __name__ == "__main__":
+    
     main()
     substituting_var_address()
     process()  # perform some operation(s) on given string
